@@ -9,6 +9,7 @@ import (
 
 	"github.com/bgmerrell/gogarc/lib/command"
 	"github.com/bgmerrell/gogarc/lib/dispatch"
+	"github.com/bgmerrell/gogarc/lib/game"
 	irc "github.com/fluffle/goirc/client"
 	"github.com/fluffle/goirc/logging/glog"
 
@@ -19,6 +20,7 @@ var host *string = flag.String("host", "irc.frws.com", "IRC server")
 var channel *string = flag.String("channel", "#gogarc", "IRC channel")
 
 type privMsgHandler struct {
+	ircGame *game.Game
 }
 
 func (p *privMsgHandler) Handle(conn *irc.Conn, line *irc.Line) {
@@ -44,7 +46,7 @@ func (p *privMsgHandler) Handle(conn *irc.Conn, line *irc.Line) {
 	if len(lineSplit) == maxCmdLen {
 		args = lineSplit[argIdx]
 	}
-	go ed.Send(&command.Command{line.Nick, cmd, args})
+	go ed.Send(p.ircGame, &command.Command{line.Nick, cmd, args})
 	for msg := range ed.Output {
 		conn.Privmsg("#gogarc", msg+"\r\n")
 	}
@@ -66,7 +68,7 @@ func main() {
 		func(conn *irc.Conn, line *irc.Line) { quit <- true })
 
 	// Set up a handler to read messages
-	c.HandleBG(irc.PRIVMSG, &privMsgHandler{})
+	c.HandleBG(irc.PRIVMSG, &privMsgHandler{game.NewGame()})
 
 	// set up a goroutine to read commands from stdin
 	in := make(chan string, 4)

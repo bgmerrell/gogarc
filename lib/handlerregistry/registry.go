@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/bgmerrell/gogarc/lib/command"
+	"github.com/bgmerrell/gogarc/lib/game"
 )
 
 var Registry = New()
 
 type Handler interface {
-	Handle(c *command.Command, outputCh chan string)
+	Handle(g *game.Game, c *command.Command, outputCh chan string)
 }
 
 type handlerRegistry struct {

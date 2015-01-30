@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bgmerrell/gogarc/lib/command"
+	"github.com/bgmerrell/gogarc/lib/game"
 	hr "github.com/bgmerrell/gogarc/lib/handlerregistry"
 )
 
@@ -15,6 +16,11 @@ func init() {
 
 type JoinHandler struct{}
 
-func (h *JoinHandler) Handle(c *command.Command, outputCh chan string) {
+func (h *JoinHandler) Handle(g *game.Game, c *command.Command, outputCh chan string) {
+	err := g.AddPlayer(c.Nick)
+	if err != nil {
+		outputCh <- err.Error()
+		return
+	}
 	outputCh <- fmt.Sprintf("%s joined the game", c.Nick)
 }
