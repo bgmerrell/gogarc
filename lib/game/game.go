@@ -27,6 +27,17 @@ func (g *Game) AddPlayer(name string) (err error) {
 		return errors.New(fmt.Sprintf(
 			"Player \"%s\" is already in the game.", name))
 	}
-	g.players[name] = NewPlayer()
+	g.players[name] = NewPlayer(name)
 	return err
+}
+
+func (g *Game) PlayerStats(name string) (stats string, err error) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	player, ok := g.players[name]
+	if !ok {
+		return "", errors.New(fmt.Sprintf(
+			"Player \"%s\" is not in the game.", name))
+	}
+	return player.String(), err
 }

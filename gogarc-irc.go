@@ -14,6 +14,7 @@ import (
 	"github.com/fluffle/goirc/logging/glog"
 
 	_ "github.com/bgmerrell/gogarc/lib/handlers/join"
+	_ "github.com/bgmerrell/gogarc/lib/handlers/stats"
 )
 
 var host *string = flag.String("host", "irc.frws.com", "IRC server")
