@@ -28,13 +28,13 @@ func newPlayerStats() *playerStats {
 }
 
 type Player struct {
-	name string
+	name  string
 	stats *playerStats
 }
 
 func NewPlayer(name string) *Player {
 	return &Player{
-		name: name,
+		name:  name,
 		stats: newPlayerStats()}
 }
 
