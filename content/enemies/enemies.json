@@ -1,0 +1,24 @@
+{
+	"name": "Goblin",
+	"stats": {
+		"health": 1,
+		"vigor": 2,
+		"wits": 1
+	}
+}
+{
+	"name": "Kobold",
+	"stats": {
+		"health": 1,
+		"vigor": 1,
+		"wits": 1
+	}
+}
+{
+	"name": "Orc",
+	"stats": {
+		"health": 1,
+		"vigor": 6,
+		"wits": 2
+	}
+}

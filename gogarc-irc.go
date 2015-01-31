@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -70,7 +71,12 @@ func main() {
 		func(conn *irc.Conn, line *irc.Line) { quit <- true })
 
 	// Set up a handler to read messages
-	c.HandleBG(irc.PRIVMSG, &privMsgHandler{game.NewGame()})
+	g, err := game.NewGame()
+	log.Fatal(err)
+	if err != nil {
+		log.Fatal(err)
+	}
+	c.HandleBG(irc.PRIVMSG, &privMsgHandler{g})
 
 	// set up a goroutine to read commands from stdin
 	in := make(chan string, 4)

@@ -20,14 +20,18 @@ type Game struct {
 	inProgress  bool
 	players     map[string]*Player
 	playerOrder []string
+	enemies     []Being
 	mu          sync.Mutex
 }
 
-func NewGame() *Game {
-	return &Game{
+func NewGame() (g *Game, err error) {
+	// TODO: initialize beings
+	g = &Game{
 		inProgress: false,
 		players:    make(map[string]*Player),
 		mu:         sync.Mutex{}}
+	g.enemies, err = LoadEnemies()
+	return g, err
 }
 
 func (g *Game) AddPlayer(name string) (err error) {
@@ -62,6 +66,9 @@ func (g *Game) Start() (msg string, err error) {
 			"You need at least %d players; %d is not enough!",
 			minPlayers, nPlayers))
 	}
+	if g.inProgress {
+		return "", errors.New("The game has already begun.")
+	}
 	g.inProgress = true
 
 	// Populate playerOrder and make sure it's shuffled
@@ -73,6 +80,6 @@ func (g *Game) Start() (msg string, err error) {
 		i += 1
 	}
 
-	return fmt.Sprintf("Game has begun.  Player order: %s",
+	return fmt.Sprintf("Game has begun.  Player order: %s.",
 		strings.Join(g.playerOrder, ", ")), err
 }

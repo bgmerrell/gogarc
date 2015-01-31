@@ -5,31 +5,30 @@ import (
 )
 
 // Customize in the future based on race or something fun
-const defaultStat = 4
+const defaultPlayerStat = 4
 
 type playerStats struct {
-	health int
-	luck   int
-	vigor  int
-	wits   int
+	beingStats
+	Luck   int
 }
 
 func (s *playerStats) String() string {
-	return fmt.Sprintf("health: %d, luck: %d, vigor: %d, wits: %d",
-		s.health, s.luck, s.vigor, s.wits)
+	return fmt.Sprintf("Health: %d, Luck: %d, Vigor: %d, Wits: %d",
+		s.Health, s.Luck, s.Vigor, s.Wits)
 }
 
-func newPlayerStats() *playerStats {
-	return &playerStats{
-		health: defaultStat,
-		wits:   defaultStat,
-		vigor:  defaultStat,
-		luck:   defaultStat}
+func newPlayerStats() playerStats {
+	return playerStats{
+		beingStats: beingStats{
+			Health: defaultPlayerStat,
+			Vigor: defaultPlayerStat,
+			Wits: defaultPlayerStat},
+		Luck:   defaultPlayerStat}
 }
 
 type Player struct {
 	name  string
-	stats *playerStats
+	stats playerStats
 }
 
 func NewPlayer(name string) *Player {
