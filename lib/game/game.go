@@ -16,16 +16,21 @@ func init() {
 // TODO: Put in config file
 const minPlayers = 2
 
+type Turn struct {
+	playerNumber int
+	hasTraveled  bool
+}
+
 type Game struct {
 	inProgress  bool
 	players     map[string]*Player
 	playerOrder []string
 	enemies     []Being
+	turn        Turn
 	mu          sync.Mutex
 }
 
 func NewGame() (g *Game, err error) {
-	// TODO: initialize beings
 	g = &Game{
 		inProgress: false,
 		players:    make(map[string]*Player),
@@ -80,6 +85,28 @@ func (g *Game) Start() (msg string, err error) {
 		i += 1
 	}
 
+	g.turn = Turn{
+		playerNumber: 0,
+		hasTraveled:  false,
+	}
 	return fmt.Sprintf("Game has begun.  Player order: %s.",
 		strings.Join(g.playerOrder, ", ")), err
+}
+
+func (g *Game) CurrentPlayer() string {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	return g.playerOrder[g.turn.playerNumber]
+}
+
+func (g *Game) InProgress() bool {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	return g.inProgress
+}
+
+func (g *Game) RandomEnemy() Being {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	return g.enemies[rand.Intn(len(g.enemies))]
 }

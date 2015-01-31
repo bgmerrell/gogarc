@@ -17,6 +17,7 @@ import (
 	_ "github.com/bgmerrell/gogarc/lib/handlers/join"
 	_ "github.com/bgmerrell/gogarc/lib/handlers/start"
 	_ "github.com/bgmerrell/gogarc/lib/handlers/stats"
+	_ "github.com/bgmerrell/gogarc/lib/handlers/travel"
 )
 
 var host *string = flag.String("host", "irc.frws.com", "IRC server")
@@ -72,7 +73,6 @@ func main() {
 
 	// Set up a handler to read messages
 	g, err := game.NewGame()
-	log.Fatal(err)
 	if err != nil {
 		log.Fatal(err)
 	}

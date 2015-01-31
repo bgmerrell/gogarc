@@ -21,5 +21,5 @@ type Being struct {
 }
 
 func (b *Being) String() string {
-	return fmt.Sprintf("%s: %s", b.Name, b.Stats.String())
+	return fmt.Sprintf("%s: (%s)", b.Name, b.Stats.String())
 }

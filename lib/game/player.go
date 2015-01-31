@@ -9,7 +9,7 @@ const defaultPlayerStat = 4
 
 type playerStats struct {
 	beingStats
-	Luck   int
+	Luck int
 }
 
 func (s *playerStats) String() string {
@@ -21,9 +21,9 @@ func newPlayerStats() playerStats {
 	return playerStats{
 		beingStats: beingStats{
 			Health: defaultPlayerStat,
-			Vigor: defaultPlayerStat,
-			Wits: defaultPlayerStat},
-		Luck:   defaultPlayerStat}
+			Vigor:  defaultPlayerStat,
+			Wits:   defaultPlayerStat},
+		Luck: defaultPlayerStat}
 }
 
 type Player struct {
@@ -38,5 +38,5 @@ func NewPlayer(name string) *Player {
 }
 
 func (p *Player) String() string {
-	return fmt.Sprintf("%s: %s", p.name, p.stats.String())
+	return fmt.Sprintf("%s: (%s)", p.name, p.stats.String())
 }
