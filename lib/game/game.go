@@ -23,8 +23,9 @@ const (
 )
 
 type Turn struct {
-	playerNumber int
+	PlayerNumber int
 	HasTraveled  bool
+	HasAttacked  bool
 	AttackType   string
 	EnemyAttack  int
 }
@@ -84,7 +85,7 @@ func (g *Game) Start() (msg string, err error) {
 	}
 
 	g.Turn = Turn{
-		playerNumber: 0,
+		PlayerNumber: 0,
 		HasTraveled:  false,
 	}
 	return fmt.Sprintf("Game has begun.  Player order: %s.",
@@ -92,9 +93,49 @@ func (g *Game) Start() (msg string, err error) {
 }
 
 func (g *Game) CurrentPlayer() *Player {
-	return g.players[g.playerOrder[g.Turn.playerNumber]]
+	return g.players[g.playerOrder[g.Turn.PlayerNumber]]
 }
 
 func (g *Game) RandomEnemy() Being {
 	return g.enemies[rand.Intn(len(g.enemies))]
+}
+
+func (g *Game) KillPlayer(name string) error {
+	if _, ok := g.players[name]; !ok {
+		return errors.New("player not in player map")
+	}
+	delete(g.players, name)
+	newPlayerOrder := []string{}
+	for _, playerName := range g.playerOrder {
+		if playerName != name {
+			newPlayerOrder = append(newPlayerOrder, name)
+		}
+	}
+	if len(newPlayerOrder) == len(g.playerOrder) {
+		return errors.New("player not in player order list")
+	}
+	g.playerOrder = newPlayerOrder
+	return nil
+}
+
+func (g *Game) EndTurn() {
+	g.Turn = Turn{
+		PlayerNumber: (g.Turn.PlayerNumber + 1) % len(g.playerOrder)}
+}
+
+func (g *Game) Reset() (err error) {
+	newGame, err := NewGame()
+	if err != nil {
+		return err
+	}
+	*g = *newGame
+	return err
+}
+
+func (g *Game) PlayersInOrder() []*Player {
+	players := []*Player{}
+	for _, player := range g.players {
+		players = append(players, player)
+	}
+	return players
 }

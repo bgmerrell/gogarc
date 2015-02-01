@@ -20,16 +20,24 @@ func init() {
 type TravelHandler struct{}
 
 func (h *TravelHandler) Handle(g *game.Game, c *command.Command, outputCh chan string) {
-	if !g.InProgress || c.Nick != g.CurrentPlayer().Name {
+	if !g.InProgress {
+		outputCh <- fmt.Sprintf("The game has not started.")
+		return
+	}
+	if c.Nick != g.CurrentPlayer().Name {
 		outputCh <- fmt.Sprintf("%s: It's not your turn.", c.Nick)
 		return
 	}
+	if g.Turn.HasTraveled {
+		outputCh <- fmt.Sprintf("%s: You have already traveled this turn.", c.Nick)
+		return
+	}
+	g.Turn.HasTraveled = true
 	enemy := g.RandomEnemy()
 
 	// The enemy attacks with whatever they are strongest with.  If their
 	// wits and vigor are the same then one "attack type" is chosen
 	// randomly.
-	var attackType string
 	var attackMod int
 	if enemy.Stats.Wits > enemy.Stats.Vigor {
 		g.Turn.AttackType = game.AttackTypeWits
@@ -47,7 +55,7 @@ func (h *TravelHandler) Handle(g *game.Game, c *command.Command, outputCh chan s
 	}
 	outputCh <- fmt.Sprintf(
 		"%s: You encounter %s that challenges your %s.",
-		c.Nick, enemy.String(), attackType)
+		c.Nick, enemy.String(), g.Turn.AttackType)
 	roll := rand.Intn(game.AttackDieSides) + 1
 	g.Turn.EnemyAttack = roll + attackMod
 	outputCh <- fmt.Sprintf(

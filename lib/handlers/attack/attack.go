@@ -20,8 +20,12 @@ func init() {
 type AttackHandler struct{}
 
 func (h *AttackHandler) Handle(g *game.Game, c *command.Command, outputCh chan string) {
+	if !g.InProgress {
+		outputCh <- fmt.Sprintf("The game has not started.")
+		return
+	}
 	player := g.CurrentPlayer()
-	if !g.InProgress || c.Nick != player.Name {
+	if c.Nick != player.Name {
 		outputCh <- fmt.Sprintf("%s: It's not your turn.", c.Nick)
 		return
 	}
@@ -46,12 +50,24 @@ func (h *AttackHandler) Handle(g *game.Game, c *command.Command, outputCh chan s
 	} else {
 		resultMsg = "You lose!"
 		player.Stats.Health -= 1
-		if player.Stats.Health <= 0 {
-			resultMsg += "You are dead!"
-			// TODO: update game state
-		}
 	}
 	outputCh <- fmt.Sprintf(
 		"%s: Your attack score is %d (%d +%d). %s",
 		c.Nick, total, roll, attackMod, resultMsg)
+	if player.Stats.Health <= 0 {
+		outputCh <- fmt.Sprintf("%s: You are dead!", c.Nick)
+		g.KillPlayer(player.Name)
+	}
+	remainingPlayers := g.PlayersInOrder()
+	if len(remainingPlayers) == 1 {
+		outputCh <- fmt.Sprintf("%s wins!", remainingPlayers[0].Name)
+		err := g.Reset()
+		if err != nil {
+			outputCh <- "Oops!  Failed to reset game: %s" + err.Error()
+			panic("Failed to reset game: " + err.Error())
+		}
+	} else {
+		g.EndTurn()
+		outputCh <- fmt.Sprintf("It is %s's turn", g.CurrentPlayer().Name)
+	}
 }
