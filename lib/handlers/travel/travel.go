@@ -23,7 +23,7 @@ func init() {
 type TravelHandler struct{}
 
 func (h *TravelHandler) Handle(g *game.Game, c *command.Command, outputCh chan string) {
-	if !g.InProgress() || c.Nick != g.CurrentPlayer() {
+	if !g.InProgress || c.Nick != g.CurrentPlayer() {
 		outputCh <- fmt.Sprintf("%s: It's not your turn.", c.Nick)
 		return
 	}

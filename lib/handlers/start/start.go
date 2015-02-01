@@ -17,7 +17,7 @@ func init() {
 type StatsHandler struct{}
 
 func (h *StatsHandler) Handle(g *game.Game, c *command.Command, outputCh chan string) {
-	if g.InProgress() {
+	if g.InProgress {
 		outputCh <- fmt.Sprintf(
 			"%s: There is already a game in progress", c.Nick)
 		return

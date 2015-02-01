@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -22,26 +21,20 @@ type Turn struct {
 }
 
 type Game struct {
-	inProgress  bool
+	InProgress  bool
 	players     map[string]*Player
 	playerOrder []string
 	enemies     []Being
 	turn        Turn
-	mu          sync.Mutex
 }
 
 func NewGame() (g *Game, err error) {
-	g = &Game{
-		inProgress: false,
-		players:    make(map[string]*Player),
-		mu:         sync.Mutex{}}
+	g = &Game{players: make(map[string]*Player)}
 	g.enemies, err = LoadEnemies()
 	return g, err
 }
 
 func (g *Game) AddPlayer(name string) (err error) {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	_, ok := g.players[name]
 	if ok {
 		return errors.New(fmt.Sprintf(
@@ -52,8 +45,6 @@ func (g *Game) AddPlayer(name string) (err error) {
 }
 
 func (g *Game) PlayerStats(name string) (stats string, err error) {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	player, ok := g.players[name]
 	if !ok {
 		return "", errors.New(fmt.Sprintf(
@@ -63,18 +54,16 @@ func (g *Game) PlayerStats(name string) (stats string, err error) {
 }
 
 func (g *Game) Start() (msg string, err error) {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	nPlayers := len(g.players)
 	if nPlayers < minPlayers {
 		return "", errors.New(fmt.Sprintf(
 			"You need at least %d players; %d is not enough!",
 			minPlayers, nPlayers))
 	}
-	if g.inProgress {
+	if g.InProgress {
 		return "", errors.New("The game has already begun.")
 	}
-	g.inProgress = true
+	g.InProgress = true
 
 	// Populate playerOrder and make sure it's shuffled
 	g.playerOrder = make([]string, nPlayers)
@@ -94,19 +83,9 @@ func (g *Game) Start() (msg string, err error) {
 }
 
 func (g *Game) CurrentPlayer() string {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	return g.playerOrder[g.turn.playerNumber]
 }
 
-func (g *Game) InProgress() bool {
-	g.mu.Lock()
-	defer g.mu.Unlock()
-	return g.inProgress
-}
-
 func (g *Game) RandomEnemy() Being {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	return g.enemies[rand.Intn(len(g.enemies))]
 }
