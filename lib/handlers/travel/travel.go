@@ -10,10 +10,7 @@ import (
 	hr "github.com/bgmerrell/gogarc/lib/handlerregistry"
 )
 
-const (
-	commandName    = "travel"
-	attackDieSides = 6
-)
+const commandName = "travel"
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -23,7 +20,7 @@ func init() {
 type TravelHandler struct{}
 
 func (h *TravelHandler) Handle(g *game.Game, c *command.Command, outputCh chan string) {
-	if !g.InProgress || c.Nick != g.CurrentPlayer() {
+	if !g.InProgress || c.Nick != g.CurrentPlayer().Name {
 		outputCh <- fmt.Sprintf("%s: It's not your turn.", c.Nick)
 		return
 	}
@@ -34,26 +31,26 @@ func (h *TravelHandler) Handle(g *game.Game, c *command.Command, outputCh chan s
 	// randomly.
 	var attackType string
 	var attackMod int
-	attackTypes := []string{"wits", "vigor"}
-	witsIdx := 0
-	vigorIdx := 1
 	if enemy.Stats.Wits > enemy.Stats.Vigor {
-		attackType = attackTypes[witsIdx]
+		g.Turn.AttackType = game.AttackTypeWits
 	} else if enemy.Stats.Wits < enemy.Stats.Vigor {
-		attackType = attackTypes[vigorIdx]
+		g.Turn.AttackType = game.AttackTypeVigor
 	} else {
-		attackType = attackTypes[rand.Intn(len(attackTypes))]
+		attackTypes := []string{game.AttackTypeWits, game.AttackTypeVigor}
+		g.Turn.AttackType = attackTypes[rand.Intn(len(attackTypes))]
 	}
-	if attackTypes[witsIdx] == attackType {
+	switch g.Turn.AttackType {
+	case game.AttackTypeWits:
 		attackMod = enemy.Stats.Wits
-	} else {
+	case game.AttackTypeVigor:
 		attackMod = enemy.Stats.Vigor
 	}
 	outputCh <- fmt.Sprintf(
 		"%s: You encounter %s that challenges your %s.",
 		c.Nick, enemy.String(), attackType)
-	roll := rand.Intn(attackDieSides)
+	roll := rand.Intn(game.AttackDieSides) + 1
+	g.Turn.EnemyAttack = roll + attackMod
 	outputCh <- fmt.Sprintf(
 		"%s: Your enemy's attack score is %d (%d +%d)",
-		c.Nick, roll+attackMod, roll, attackMod)
+		c.Nick, g.Turn.EnemyAttack, roll, attackMod)
 }

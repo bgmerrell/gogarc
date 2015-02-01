@@ -27,16 +27,16 @@ func newPlayerStats() playerStats {
 }
 
 type Player struct {
-	name  string
-	stats playerStats
+	Name  string
+	Stats playerStats
 }
 
 func NewPlayer(name string) *Player {
 	return &Player{
-		name:  name,
-		stats: newPlayerStats()}
+		Name:  name,
+		Stats: newPlayerStats()}
 }
 
 func (p *Player) String() string {
-	return fmt.Sprintf("%s: (%s)", p.name, p.stats.String())
+	return fmt.Sprintf("%s: (%s)", p.Name, p.Stats.String())
 }

@@ -12,12 +12,21 @@ func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
-// TODO: Put in config file
-const minPlayers = 2
+const (
+	// TODO: Put in config file
+	minPlayers = 2
+
+	AttackDieSides = 6
+
+	AttackTypeWits  = "wits"
+	AttackTypeVigor = "vigor"
+)
 
 type Turn struct {
 	playerNumber int
-	hasTraveled  bool
+	HasTraveled  bool
+	AttackType   string
+	EnemyAttack  int
 }
 
 type Game struct {
@@ -25,7 +34,7 @@ type Game struct {
 	players     map[string]*Player
 	playerOrder []string
 	enemies     []Being
-	turn        Turn
+	Turn        Turn
 }
 
 func NewGame() (g *Game, err error) {
@@ -50,7 +59,7 @@ func (g *Game) PlayerStats(name string) (stats string, err error) {
 		return "", errors.New(fmt.Sprintf(
 			"Player \"%s\" is not in the game.", name))
 	}
-	return player.String(), err
+	return player.Stats.String(), err
 }
 
 func (g *Game) Start() (msg string, err error) {
@@ -74,16 +83,16 @@ func (g *Game) Start() (msg string, err error) {
 		i += 1
 	}
 
-	g.turn = Turn{
+	g.Turn = Turn{
 		playerNumber: 0,
-		hasTraveled:  false,
+		HasTraveled:  false,
 	}
 	return fmt.Sprintf("Game has begun.  Player order: %s.",
 		strings.Join(g.playerOrder, ", ")), err
 }
 
-func (g *Game) CurrentPlayer() string {
-	return g.playerOrder[g.turn.playerNumber]
+func (g *Game) CurrentPlayer() *Player {
+	return g.players[g.playerOrder[g.Turn.playerNumber]]
 }
 
 func (g *Game) RandomEnemy() Being {

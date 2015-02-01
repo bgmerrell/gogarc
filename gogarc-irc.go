@@ -14,6 +14,7 @@ import (
 	irc "github.com/fluffle/goirc/client"
 	"github.com/fluffle/goirc/logging/glog"
 
+	_ "github.com/bgmerrell/gogarc/lib/handlers/attack"
 	_ "github.com/bgmerrell/gogarc/lib/handlers/join"
 	_ "github.com/bgmerrell/gogarc/lib/handlers/start"
 	_ "github.com/bgmerrell/gogarc/lib/handlers/stats"
