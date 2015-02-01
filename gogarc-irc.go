@@ -24,7 +24,8 @@ var host *string = flag.String("host", "irc.frws.com", "IRC server")
 var channel *string = flag.String("channel", "#gogarc", "IRC channel")
 
 type privMsgHandler struct {
-	ircGame *game.Game
+	ircGame         *game.Game
+	eventDispatcher *dispatch.EventDispatcher
 }
 
 func (p *privMsgHandler) Handle(conn *irc.Conn, line *irc.Line) {
@@ -34,7 +35,6 @@ func (p *privMsgHandler) Handle(conn *irc.Conn, line *irc.Line) {
 	const maxCmdLen = 2
 	const cmdIdx = 0
 	const argIdx = 1
-	ed := dispatch.NewEventDispatcher()
 	lineText := line.Text()
 	// TODO: make command prefix configurable
 	// Ignore messages not for gogarc
@@ -50,8 +50,10 @@ func (p *privMsgHandler) Handle(conn *irc.Conn, line *irc.Line) {
 	if len(lineSplit) == maxCmdLen {
 		args = lineSplit[argIdx]
 	}
-	go ed.Send(p.ircGame, &command.Command{line.Nick, cmd, args})
-	for msg := range ed.Output {
+	outputCh := make(chan string)
+	go p.eventDispatcher.Send(
+		p.ircGame, &command.Command{line.Nick, cmd, args}, outputCh)
+	for msg := range outputCh {
 		conn.Privmsg("#gogarc", msg+"\r\n")
 	}
 }
@@ -76,7 +78,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	c.HandleBG(irc.PRIVMSG, &privMsgHandler{g})
+	c.HandleBG(irc.PRIVMSG, &privMsgHandler{g, dispatch.NewEventDispatcher()})
 
 	// set up a goroutine to read commands from stdin
 	in := make(chan string, 4)
