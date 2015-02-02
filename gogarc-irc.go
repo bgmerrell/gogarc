@@ -55,7 +55,7 @@ func (p *privMsgHandler) Handle(conn *irc.Conn, line *irc.Line) {
 	go p.eventDispatcher.Send(
 		p.ircGame, &command.Command{line.Nick, cmd, args}, outputCh)
 	for msg := range outputCh {
-		conn.Privmsg("#gogarc", msg+"\r\n")
+		conn.Privmsg(*channel, msg+"\r\n")
 	}
 }
 
@@ -128,7 +128,7 @@ func main() {
 				case cmd[1] == 'p':
 					c.Part(cmd[idx+1 : len(cmd)])
 				case cmd[1] == 'm':
-					c.Privmsg("#gogarc", cmd[idx+1:len(cmd)])
+					c.Privmsg(*channel, cmd[idx+1:len(cmd)])
 				}
 			} else {
 				c.Raw(cmd)

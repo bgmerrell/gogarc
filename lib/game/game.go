@@ -100,21 +100,22 @@ func (g *Game) RandomEnemy() Being {
 	return g.enemies[rand.Intn(len(g.enemies))]
 }
 
+// KillPlayer removes a player from the games and ends that player's turn
 func (g *Game) KillPlayer(name string) error {
 	if _, ok := g.players[name]; !ok {
 		return errors.New("player not in player map")
 	}
 	delete(g.players, name)
-	newPlayerOrder := []string{}
-	for _, playerName := range g.playerOrder {
-		if playerName != name {
-			newPlayerOrder = append(newPlayerOrder, name)
+	var i int
+	var playerName string
+	for i, playerName = range g.playerOrder {
+		if playerName == name {
+			break
 		}
 	}
-	if len(newPlayerOrder) == len(g.playerOrder) {
-		return errors.New("player not in player order list")
-	}
-	g.playerOrder = newPlayerOrder
+	g.playerOrder = append(g.playerOrder[:i], g.playerOrder[i+1:]...)
+	g.Turn = Turn{
+		PlayerNumber: (g.Turn.PlayerNumber) % len(g.playerOrder)}
 	return nil
 }
 

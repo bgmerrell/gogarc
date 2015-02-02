@@ -54,20 +54,26 @@ func (h *AttackHandler) Handle(g *game.Game, c *command.Command, outputCh chan s
 	outputCh <- fmt.Sprintf(
 		"%s: Your attack score is %d (%d +%d). %s",
 		c.Nick, total, roll, attackMod, resultMsg)
+	// Death
 	if player.Stats.Health <= 0 {
 		outputCh <- fmt.Sprintf("%s: You are dead!", c.Nick)
-		g.KillPlayer(player.Name)
-	}
-	remainingPlayers := g.PlayersInOrder()
-	if len(remainingPlayers) == 1 {
-		outputCh <- fmt.Sprintf("%s wins!", remainingPlayers[0].Name)
-		err := g.Reset()
+		err := g.KillPlayer(player.Name)
 		if err != nil {
-			outputCh <- "Oops!  Failed to reset game: %s" + err.Error()
-			panic("Failed to reset game: " + err.Error())
+			outputCh <- "Oops!  Failed to kill player: %s" + err.Error()
+			panic("Failed to kill player: " + err.Error())
+		}
+		remainingPlayers := g.PlayersInOrder()
+		if len(remainingPlayers) == 1 {
+			outputCh <- fmt.Sprintf("%s wins!", remainingPlayers[0].Name)
+			err = g.Reset()
+			if err != nil {
+				outputCh <- "Oops!  Failed to reset game: %s" + err.Error()
+				panic("Failed to reset game: " + err.Error())
+			}
+			return
 		}
 	} else {
 		g.EndTurn()
-		outputCh <- fmt.Sprintf("It is %s's turn", g.CurrentPlayer().Name)
 	}
+	outputCh <- fmt.Sprintf("It is %s's turn", g.CurrentPlayer().Name)
 }
